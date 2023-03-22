@@ -1,0 +1,32 @@
+cargo-features = [ "profile-rustflags" ]
+
+[package]
+name = "hex_ln"
+description = "'I cross two fingers, a binary precaution against hex, effective as superconductor or simple superstition.' ― Neil Gaiman, Smoke and Mirrors"
+version = "0.1.0"
+license = "MIT"
+authors = ["Zeno <zeno@0x157.tech>"]
+edition = "2018"
+
+[dependencies]
+log = "^0.4.0"
+ttf-parser = { version = "^0.18.0", default-features = false }
+
+[build-dependencies]
+bindgen = { version = "0.64", default-features = false }
+
+[features]
+no_std = []
+log = []
+
+[profile.mini]
+rustflags = [ "--cfg", "feature=\"no_std\"" ]
+inherits = "release"
+panic = "abort"
+lto = true
+incremental = true
+opt-level = "z"
+
+[profile.dev]
+panic = "abort"
+incremental = true
