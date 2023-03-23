@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.1.0 (2023-03-23)
 
+<csr-id-0b27aa85e2706dcc50f9023a684884a23372493c/>
+
 ### Other
 
  - <csr-id-0b27aa85e2706dcc50f9023a684884a23372493c/> hex_ln v0.1.0
+
+### Other
+
+ - <csr-id-5a18ffa19dd0361a92e597f94c1e993cf565e20f/> hex_ln v0.1.0
 
 ### Commit Statistics
 
@@ -26,6 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
-    - Hex_ln v0.1.0 ([`0b27aa8`](https://github.com/HexLabs/_64/commit/0b27aa85e2706dcc50f9023a684884a23372493c))
+    - Hex_ln v0.1.0 ([`5a18ffa`](https://github.com/HexLabs/_64/commit/5a18ffa19dd0361a92e597f94c1e993cf565e20f))
 </details>
 
