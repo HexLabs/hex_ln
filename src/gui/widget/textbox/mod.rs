@@ -55,8 +55,6 @@ impl TextBox {
         self.buf.bind();
         self.buf.viewport([0, 0], [w, h]);
         self.buf.clear_color([0.0, 0.0, 0.0, 1.0]);
-
-        // Build an orthographic projection matrix
         ortho([0.0, 0.0], [w as f32, h as f32]).bind(0);
 
         // Position the cursor for the first character
@@ -80,6 +78,7 @@ impl TextBox {
 
                 &ch => {
                     // Draw the character if it has an outline
+                    log::debug!("{}", ch as char);
                     let glyph = font.get(ch).expect("character not found");
                     if let Some(tex) = &glyph.tex {
                         let [w, h] = [glyph.size[0] as f32 * scale, glyph.size[1] as f32 * scale];
@@ -123,6 +122,7 @@ impl TextBox {
     }
 
     pub fn update(&mut self, text: &str) {
+        log::debug!("rendering text {}", text);
         self.text = text.as_bytes().into();
     }
 

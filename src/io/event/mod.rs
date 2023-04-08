@@ -14,23 +14,16 @@ pub enum Event {
     },
 }
 
-#[repr(u32)]
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum KeyCode {
-    CapsLock = SDLK_CAPSLOCK,
-    None,
-}
+pub use super::sdl::SDL_KeyCode as KeyCode;
 
 pub struct EventChannel;
 
-impl EventChannel {
-    pub fn text_input(&self, enable: bool) {
-        unsafe {
-            if enable {
-                SDL_StartTextInput();
-            } else {
-                SDL_StopTextInput();
-            }
+pub fn enable_text_input(enable: bool) {
+    unsafe {
+        if enable {
+            SDL_StartTextInput();
+        } else {
+            SDL_StopTextInput();
         }
     }
 }
@@ -62,10 +55,7 @@ impl Iterator for EventChannel {
                         Some(Event::Keyboard {
                             down,
                             timestamp,
-                            sym: match sym as u32 {
-                                SDLK_CAPSLOCK => KeyCode::CapsLock,
-                                _ => KeyCode::None,
-                            },
+                            sym: SDL_KeyCode(sym as _),
                             mod_: mod_ as _,
                         })
                     }

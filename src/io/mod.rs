@@ -11,3 +11,5 @@ pub mod window;
 mod sdl {
     include!(concat!(env!("OUT_DIR"), "/sdl.rs"));
 }
+
+pub use sdl::SDL_Keycode as Keycode;

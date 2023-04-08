@@ -17,10 +17,11 @@ use {
             Resource, Target, SWAP_CHAIN,
         },
         gui::{font::Font, widget::TextBox},
-        win::{
-            event::{Event, EventChannel, KeyCode},
+        io::{
+            event::{enable_text_input, Event, EventChannel, KeyCode},
             window::Window,
         },
+        mem::vec::Vec,
     },
 };
 
@@ -80,6 +81,8 @@ mod no_std {
 
 #[cfg_attr(feature = "no_std", no_mangle)]
 pub fn main() {
+    #[cfg(feature = "log")]
+    hex_ln::init_logging();
     let window = Window::new(
         unsafe { &CStr::from_ptr("HELLO WORLD\0".as_ptr().cast()) },
         1920,
@@ -89,8 +92,8 @@ pub fn main() {
 
     let font = Font::default();
     let mut greets = TextBox::new([1920, 1080]);
-    greets.update("Greetz!\n\tit builds:D");
-    greets.draw([1920, 1080], &font, 10.0);
+    greets.update("Edit Mode:");
+    greets.draw([1920, 1080], &font, 5.0);
 
     let tex_quad = Mesh::new(
         &[
@@ -104,12 +107,11 @@ pub fn main() {
     );
 
     let glyph_prog = Program::new(POS2D_TEX2D, TEX2D);
-    glyph_prog.bind();
 
     let mut events = EventChannel;
-    events.text_input(true);
+    log::set_max_level(log::LevelFilter::Off);
 
-    let mut edit = true;
+    let mut edit = false;
     loop {
         match events.next() {
             Some(event) => match event {
@@ -117,8 +119,28 @@ pub fn main() {
                     break;
                 }
 
-                Event::Keyboard { down, sym, .. } if sym == KeyCode::CapsLock && down => {
+                Event::Keyboard { down, sym, .. } if sym == KeyCode::SDLK_F1 && down => {
                     edit = !edit;
+                    enable_text_input(edit);
+                }
+
+                Event::TextInput { text } if edit => {
+                    log::set_max_level(log::LevelFilter::Debug);
+                    log::debug!("accepted text input of {:?}", text);
+                    greets.update(unsafe {
+                        core::str::from_utf8_unchecked(
+                            &[
+                                b"Edit Mode:\n",
+                                text.iter()
+                                    .map_while(|&ch| if ch != 0 { Some(ch as u8) } else { None })
+                                    .collect::<Vec<u8>>()
+                                    .as_slice(),
+                            ]
+                            .concat(),
+                        )
+                    });
+                    greets.draw([1920, 1080], &font, 5.0);
+                    log::set_max_level(log::LevelFilter::Off);
                 }
 
                 _ => {}
@@ -132,6 +154,7 @@ pub fn main() {
         SWAP_CHAIN.viewport([0, 0], [WIDTH, HEIGHT]);
 
         if edit {
+            glyph_prog.bind();
             greets.view().bind();
             tex_quad.draw();
         }

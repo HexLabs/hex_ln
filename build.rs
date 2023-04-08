@@ -13,8 +13,6 @@ fn main() {
         .use_core()
         .ctypes_prefix("core::ffi")
         .prepend_enum_name(false)
-        .derive_debug(false)
-        .derive_eq(false)
         .header_contents(
             "gl.h",
             "
@@ -32,8 +30,6 @@ fn main() {
         .use_core()
         .ctypes_prefix("core::ffi")
         .prepend_enum_name(false)
-        .derive_debug(false)
-        .derive_eq(false)
         .header_contents(
             "sdl.h",
             "
@@ -42,6 +38,7 @@ fn main() {
             ",
         )
         .blocklist_item("FP_.*")
+        .newtype_enum("SDL_KeyCode")
         .generate()
         .expect("ERR generating sdl.h binding")
         .write_to_file(out_dir.join("sdl.rs"))
