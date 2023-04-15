@@ -9,7 +9,7 @@ use {
             texture::{Texture, TEX_2D},
             Resource, Target,
         },
-        math::{Spline, Subdivide},
+        math::Spline,
         mem::vec::Vec,
     },
     ttf_parser::{Face, FaceParsingError, OutlineBuilder, Rect},
@@ -101,33 +101,29 @@ impl<'a> GlyphBuilder<'a> {
                      }| {
                         let size = [(x_max - x_min) as i32, (y_max - y_min) as i32];
 
+                        let segments = outline.build();
                         log::debug!(
-                            "'{}' has outline with size {:?} and {} splines",
+                            "'{}' has outline with size {:?} and {} segments",
                             ch.escape_default(),
                             size,
-                            outline.splines.len(),
+                            segments.len(),
                         );
 
-                        let verts = outline.splines.iter().fold(
-                            Vec::with_capacity(outline.splines.len() * 100 + 1),
-                            |mut points, spline| {
-                                points.push([0.0, 0.0]);
-                                spline
-                                    .subdivide(10)
-                                    .iter()
-                                    .fold(points, |mut points, point| {
-                                        let point = [
+                        let verts: Vec<[f32; 2]> = segments
+                            .iter()
+                            .flat_map(|spline| {
+                                spline.iter().flat_map(|bezier| {
+                                    bezier.subdivide(10).map(|point| {
+                                        [
                                             (2.0 * (point[0] - x_min as f32) / size[0] as f32)
                                                 - 1.0,
                                             (2.0 * (point[1] - y_min as f32) / size[1] as f32)
                                                 - 1.0,
-                                        ];
-                                        points.push(point);
-
-                                        points
+                                        ]
                                     })
-                            },
-                        );
+                                })
+                            })
+                            .collect();
 
                         let glyph = Mesh::new(&verts, Usage::StaticDraw, Topology::TriFan);
                         let quad = Mesh::new(
@@ -173,17 +169,21 @@ impl<'a> GlyphBuilder<'a> {
     }
 }
 
-struct SplineBuilder {
+pub struct SplineBuilder {
     splines: Vec<Spline>,
     head: [f32; 2],
 }
 
 impl SplineBuilder {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            splines: Vec::with_capacity(1),
-            head: [0.0; 2],
+            splines: Vec::new(),
+            head: [0.0, 0.0],
         }
+    }
+
+    pub fn build(self) -> Vec<Spline> {
+        self.splines
     }
 }
 
@@ -195,19 +195,19 @@ impl OutlineBuilder for SplineBuilder {
 
     fn line_to(&mut self, x: f32, y: f32) {
         let idx = self.splines.len() - 1;
-        self.splines[idx].push([self.head, [x, y]].as_slice().into());
+        self.splines[idx].push([self.head, [x, y]].into());
         self.head = [x, y];
     }
 
     fn quad_to(&mut self, x1: f32, y1: f32, x: f32, y: f32) {
         let idx = self.splines.len() - 1;
-        self.splines[idx].push([self.head, [x1, y1], [x, y]].as_slice().into());
+        self.splines[idx].push([self.head, [x1, y1], [x, y]].into());
         self.head = [x, y];
     }
 
     fn curve_to(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x: f32, y: f32) {
         let idx = self.splines.len() - 1;
-        self.splines[idx].push([self.head, [x1, y1], [x2, y2], [x, y]].as_slice().into());
+        self.splines[idx].push([self.head, [x1, y1], [x2, y2], [x, y]].into());
         self.head = [x, y];
     }
 
